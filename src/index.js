@@ -80,10 +80,24 @@ class RobloxApi {
     }
     
     const updateMask = Object.keys(updates).join(',');
-    await this.universesClient.patch(
-      `/cloud/v2/universes/${experienceId}/places/${placeId}?updateMask=${updateMask}`,
-      updates
+    const response = await fetch(
+      `https://apis.roblox.com/cloud/v2/universes/${experienceId}/places/${placeId}?updateMask=${updateMask}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'x-api-key': this.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      }
     );
+    
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to update place (${response.status}): ${text}`);
+    }
+    
+    return response.json();
   }
 
   async deletePlace(experienceId, placeId) {
