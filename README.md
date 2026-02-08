@@ -52,7 +52,6 @@ GitHub Action for managing Roblox places using private API.
     experience_id: '123456789'
     place_id: '987654321'
     file_path: 'path/to/game.rbxl'
-    version_type: 'Published'  # Optional, defaults to Published
 ```
 
 ## Inputs
@@ -65,7 +64,6 @@ GitHub Action for managing Roblox places using private API.
 | `place_id` | Roblox Place ID (required for `delete` and `publish`) | No |
 | `api_key` | Roblox Open Cloud API Key (required for `publish`) | No |
 | `file_path` | Path to `.rbxl` or `.rbxlx` file (required for `publish`) | No |
-| `version_type` | Version type: `Published` or `Saved` (default: `Published`) | No |
 
 ## Outputs
 

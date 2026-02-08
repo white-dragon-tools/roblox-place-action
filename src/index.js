@@ -2,6 +2,14 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 import axios from 'axios';
 
+function setOutput(name, value) {
+  core.setOutput(name, value);
+  const githubOutput = process.env.GITHUB_OUTPUT;
+  if (githubOutput) {
+    fs.appendFileSync(githubOutput, `${name}=${value}\n`);
+  }
+}
+
 class RobloxApi {
   constructor(roblosecurity, apiKey) {
     this.cookie = `.ROBLOSECURITY=${roblosecurity}`;
@@ -138,7 +146,7 @@ async function run() {
     switch (action) {
       case 'create': {
         const placeId = await api.createPlace(experienceId);
-        core.setOutput('place_id', placeId.toString());
+        setOutput('place_id', placeId.toString());
         core.info(`Created place: ${placeId}`);
         break;
       }
@@ -150,7 +158,7 @@ async function run() {
       }
       case 'list': {
         const places = await api.listPlaces(experienceId);
-        core.setOutput('places', JSON.stringify(places));
+        setOutput('places', JSON.stringify(places));
         core.info(`Found ${places.length} place(s)`);
         break;
       }
@@ -160,9 +168,9 @@ async function run() {
         const versionType = core.getInput('version_type') || 'Published';
         
         const result = await api.publishPlace(experienceId, placeId, filePath, versionType);
-        core.setOutput('success', 'true');
+        setOutput('success', 'true');
         if (result.versionNumber) {
-          core.setOutput('version_number', result.versionNumber.toString());
+          setOutput('version_number', result.versionNumber.toString());
           core.info(`Published place ${placeId} - Version ${result.versionNumber}`);
         } else {
           core.info(`Published place ${placeId} successfully`);
