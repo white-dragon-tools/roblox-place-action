@@ -60,12 +60,30 @@ class RobloxApi {
     return {};
   }
 
-  async createPlace(experienceId) {
+  async createPlace(experienceId, name) {
     const response = await this.request(
       `https://apis.roblox.com/universes/v1/user/universes/${experienceId}/places`,
       { method: 'POST', body: JSON.stringify({ templatePlaceId: 95206881 }) }
     );
-    return response.placeId;
+    const placeId = response.placeId;
+    
+    if (name) {
+      await this.updatePlace(experienceId, placeId, { displayName: name });
+    }
+    
+    return placeId;
+  }
+
+  async updatePlace(experienceId, placeId, updates) {
+    if (!this.apiKey) {
+      throw new Error('API Key is required for updating place. Please provide api_key input.');
+    }
+    
+    const updateMask = Object.keys(updates).join(',');
+    await this.universesClient.patch(
+      `/cloud/v2/universes/${experienceId}/places/${placeId}?updateMask=${updateMask}`,
+      updates
+    );
   }
 
   async deletePlace(experienceId, placeId) {
@@ -145,9 +163,10 @@ async function run() {
 
     switch (action) {
       case 'create': {
-        const placeId = await api.createPlace(experienceId);
+        const placeName = core.getInput('place_name');
+        const placeId = await api.createPlace(experienceId, placeName);
         setOutput('place_id', placeId.toString());
-        core.info(`Created place: ${placeId}`);
+        core.info(`Created place: ${placeId}${placeName ? ` (${placeName})` : ''}`);
         break;
       }
       case 'delete': {

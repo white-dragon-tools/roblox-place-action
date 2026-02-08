@@ -21,6 +21,9 @@ inputs:
   file_path:
     description: 'Path to .rbxl or .rbxlx file (required for publish action)'
     required: false
+  place_name:
+    description: 'Name for the new place (optional, for create action, requires api_key)'
+    required: false
 
 outputs:
   place_id:
@@ -55,6 +58,7 @@ runs:
         INPUT_PLACE_ID: ${{ inputs.place_id }}
         INPUT_API_KEY: ${{ inputs.api_key }}
         INPUT_FILE_PATH: ${{ inputs.file_path }}
+        INPUT_PLACE_NAME: ${{ inputs.place_name }}
 
 branding:
   icon: 'box'
