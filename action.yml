@@ -13,7 +13,13 @@ inputs:
     description: 'Roblox Experience (Universe) ID'
     required: true
   place_id:
-    description: 'Roblox Place ID (required for delete action)'
+    description: 'Roblox Place ID (required for delete and publish actions)'
+    required: false
+  api_key:
+    description: 'Roblox Open Cloud API Key (required for publish action)'
+    required: false
+  file_path:
+    description: 'Path to .rbxl or .rbxlx file (required for publish action)'
     required: false
 
 outputs:
@@ -21,6 +27,10 @@ outputs:
     description: 'Created place ID (for create action)'
   places:
     description: 'JSON array of places (for list action)'
+  success:
+    description: 'Whether the publish was successful (for publish action)'
+  version_number:
+    description: 'Published version number (for publish action)'
 
 runs:
   using: 'composite'
@@ -38,6 +48,8 @@ runs:
         INPUT_ROBLOSECURITY: ${{ inputs.roblosecurity }}
         INPUT_EXPERIENCE_ID: ${{ inputs.experience_id }}
         INPUT_PLACE_ID: ${{ inputs.place_id }}
+        INPUT_API_KEY: ${{ inputs.api_key }}
+        INPUT_FILE_PATH: ${{ inputs.file_path }}
 
 branding:
   icon: 'box'

@@ -1,9 +1,22 @@
 import * as core from '@actions/core';
+import * as fs from 'fs';
+import axios from 'axios';
 
 class RobloxApi {
-  constructor(roblosecurity) {
+  constructor(roblosecurity, apiKey) {
     this.cookie = `.ROBLOSECURITY=${roblosecurity}`;
     this.csrfToken = null;
+    this.apiKey = apiKey;
+    
+    // Open Cloud API client for publishing
+    if (apiKey) {
+      this.universesClient = axios.create({
+        baseURL: 'https://apis.roblox.com/universes',
+        headers: {
+          'x-api-key': apiKey
+        }
+      });
+    }
   }
 
   async request(url, options = {}) {
@@ -86,15 +99,41 @@ class RobloxApi {
 
     return allPlaces;
   }
+
+  async publishPlace(experienceId, placeId, filePath, versionType = 'Published') {
+    if (!this.apiKey) {
+      throw new Error('API Key is required for publishing. Please provide api_key input.');
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    const fileContent = fs.readFileSync(filePath);
+    
+    // 使用 Open Cloud API v1 发布场景
+    const response = await this.universesClient.post(
+      `/v1/${experienceId}/places/${placeId}/versions?versionType=${versionType}`,
+      fileContent,
+      {
+        headers: {
+          'Content-Type': 'application/octet-stream'
+        }
+      }
+    );
+
+    return response.data;
+  }
 }
 
 async function run() {
   try {
     const action = core.getInput('action', { required: true });
     const roblosecurity = core.getInput('roblosecurity', { required: true });
+    const apiKey = core.getInput('api_key'); // Optional, required for publish action
     const experienceId = parseInt(core.getInput('experience_id', { required: true }), 10);
 
-    const api = new RobloxApi(roblosecurity);
+    const api = new RobloxApi(roblosecurity, apiKey);
 
     switch (action) {
       case 'create': {
@@ -115,8 +154,23 @@ async function run() {
         core.info(`Found ${places.length} place(s)`);
         break;
       }
+      case 'publish': {
+        const placeId = parseInt(core.getInput('place_id', { required: true }), 10);
+        const filePath = core.getInput('file_path', { required: true });
+        const versionType = core.getInput('version_type') || 'Published';
+        
+        const result = await api.publishPlace(experienceId, placeId, filePath, versionType);
+        core.setOutput('success', 'true');
+        if (result.versionNumber) {
+          core.setOutput('version_number', result.versionNumber.toString());
+          core.info(`Published place ${placeId} - Version ${result.versionNumber}`);
+        } else {
+          core.info(`Published place ${placeId} successfully`);
+        }
+        break;
+      }
       default:
-        throw new Error(`Unknown action: ${action}. Use 'create', 'delete', or 'list'.`);
+        throw new Error(`Unknown action: ${action}. Use 'create', 'delete', 'list', or 'publish'.`);
     }
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : 'An unknown error occurred');
