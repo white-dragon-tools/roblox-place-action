@@ -17,7 +17,9 @@ GitHub Action for managing Roblox places using private API.
   with:
     action: create
     roblosecurity: ${{ secrets.ROBLOSECURITY }}
+    api_key: ${{ secrets.ROBLOX_API_KEY }}  # Required if setting place_name
     experience_id: '123456789'
+    place_name: 'My New Place'  # Optional
 ```
 
 ### Delete a Place
@@ -62,8 +64,9 @@ GitHub Action for managing Roblox places using private API.
 | `roblosecurity` | Roblox `.ROBLOSECURITY` cookie | Yes |
 | `experience_id` | Roblox Experience (Universe) ID | Yes |
 | `place_id` | Roblox Place ID (required for `delete` and `publish`) | No |
-| `api_key` | Roblox Open Cloud API Key (required for `publish`) | No |
+| `api_key` | Roblox Open Cloud API Key (required for `publish` and `place_name`) | No |
 | `file_path` | Path to `.rbxl` or `.rbxlx` file (required for `publish`) | No |
+| `place_name` | Name for the new place (optional, for `create` action) | No |
 
 ## Outputs
 
